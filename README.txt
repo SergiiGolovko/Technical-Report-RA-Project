@@ -1,0 +1,1 @@
+This repository contains the technical report I prepared when I was a Research Assistant at the Center for the Study of Auctions, Procurements and Competition Policy, under the supervision of Dr. Marshal. 

@@ -1,0 +1,1142 @@
+Sub SheetsReorganizer()
+    
+Sheet1Reorganizer
+Sheet2Reorganizer
+Sheet3Reorganizer 'column M = N + O
+Sheet4Reorganizer
+Sheet5Reorganizer
+Sheet6Reorganizer
+Sheet8Reorganizer
+Sheet7Reorganizer
+Sheet9Reorganizer
+Sheet10Reorganizer
+Sheet11Reorganizer
+Sheet12Reorganizer
+'use only with extremely big data
+'Sheet2DeleteRows
+Sheet1AddColumns
+Sheet5AddColumns
+AddTimeColumn
+
+
+
+End Sub
+
+Sub Sheet1Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(1).Name = "AllBids"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, LICENSE_NAME, MARKET, FREQ_BLOCK, SUB_MARKET, BANDWIDTH_MHZ, MARKET_DESC, BID_UNITS, POPULATION, FCC_ACCT, BIDDER_NAME, BID_AMNT, NET_BID_AMNT, BIDDING_CREDIT_PCTG, THEDATE, THETIME, INCR_BIDS, RANDOM_NUMBER"
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, D, H, I, J, P, E, P, P, G, F, L, M, P, N, P, K, O"
+strCColumns = Split(clcList, ", ")
+
+ThisWorkbook.Worksheets(1).Activate
+         
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(1).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(1).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'sort by Round, LICENSE_NAME, FCC_ACCT
+
+ThisWorkbook.Worksheets(1).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("C2"), _
+             order2:=xlAscending, key3:=Range("K2"), order3:=xlAscending
+
+
+End Sub
+
+Sub Sheet2Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+Dim m As Integer
+
+'worksheet number in this workbook
+n = 2
+'worksheet number in MainBook
+m = 8
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+ThisWorkbook.Worksheets(n).Name = "HighBids"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, LICENSE_NAME, MARKET, FREQ_BLOCK, SUB_MARKET, FCC_ACCT, BIDDER_NAME, BID_ROUND_NUM, BID_AMNT, NET_BID_AMNT, BIDDING_CREDIT_PCTG, THEDATE, THETIME, NUM_OF_BIDS, INCR_BIDS, MIN_ACCEPT, BID_INCR_PCTG, MAB_INCR, MAB_INCR_PCTG, PREV_BIDDER_ACCT, ROUND_PREV_PWB, PREV_BID_AMNT, PREV_BIDDING_CREDIT_PCTG, PREV_NET_BID_AMNT, ITEM_ACTIVITY_WEIGHT, MAB_FLOOR, MAB_CEILING"
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, AA, AB"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, D, F, G, H, N, M, R, O, Q, P, T, AO, L, S, V, AC, W, X, AE, AF, AG, AH, AI, AA, Y, Z"
+strCColumns = Split(clcList, ", ")
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'transforming bidding credit pctg to percentage and prev bidder account
+j = 2
+Do While Not IsEmpty(Range("A" & CStr(j)))
+    Range("L" & CStr(j)) = Range("L" & CStr(j)) * 100
+    
+    'set PREV_BIDDER_ACCOUNT to zero if FCC
+    If Range("U" & CStr(j)) = "" Then
+        Range("U" & CStr(j)) = "0"
+    End If
+
+    j = j + 1
+Loop
+
+'Sort by Round, LICENSE_NAME
+ThisWorkbook.Worksheets(2).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("C2"), _
+             order2:=xlAscending
+             
+End Sub
+
+Sub Sheet3Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(3).Name = "Eligibility"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, FCC_ACCT, BIDDER_NAME, NUM_OF_BIDS, TOTAL_BIDS_AMNT, TOTAL_NET_BIDS_AMNT, PWBS_NUMBER, PWBS_AMNT, NET_PWBS_AMNT, MAX_ELIG, UNUSED_ELIGIB, REQUIRED_ACT, CURRENT_ACT, ADDTNL_ACT_REQ, AT_RISK, ELIG_CHANGE, RMNG_WAIVR, WAIVR_IND, RMNG_WITHDRAWALS"
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, E, D, K, L, M, N, Q, R, G, H, AA, S, T, U, I, W, J, X"
+strCColumns = Split(clcList, ", ")
+         
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(3).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(3).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'calculate required_act
+j = 2
+Do While Not IsEmpty(Range("A" & CStr(j)))
+    Range("M" & CStr(j)) = Range("N" & CStr(j)) + Range("O" & CStr(j))
+    j = j + 1
+Loop
+
+'Sort by Round and Bidder Name
+ThisWorkbook.Worksheets(3).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("D2"), _
+             order2:=xlAscending
+
+End Sub
+
+Sub Sheet4Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 4
+'worksheet number in MainBook
+m = 11
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "Withdrawals"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, LICENSE_NAME, ROUND_NUMBER, BID_ROUND_NUM, FCC_ACCT, BIDDER_NAME, BID_AMNT, NET_BID_AMNT, THEDATE, THETIME, MIN_ACCEPT"
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K"
+strPColumns = Split(clpList, ", ")
+clcList = "A, E, J, K, D, C, L, M, N, P, O"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+End Sub
+
+Sub Sheet5Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 5
+'worksheet number in Bidders
+m = 1
+
+sFilePath = ThisWorkbook.Path & "\Bidders.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "Bidders"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER,  BIDDER_NUMBER,   BIDDER_NAME, FCC_ACCT,   UPFRONT_PMNT,    BID_UNITS,   BIDDING_CREDIT_PCTG, PREF"
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H"
+strPColumns = Split(clpList, ", ")
+clcList = "A, AA, D, E, G, G, AA, F"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+ 
+Next
+
+'Sort by License_name
+
+ThisWorkbook.Worksheets(5).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes
+
+End Sub
+
+Sub Sheet6Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 6
+'worksheet number in Items
+m = 1
+
+sFilePath = ThisWorkbook.Path & "\Items.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "Markets"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, LICENSE_NAME, SERVICE_CODE, MARKET, FREQ_BLOCK, SUB_MARKET, CHANNEL_NO, MARKET_DESC, BANDWIDTH_MHZ, OPEN, POPULATION, BID_UNITS, UPFRONT_PMNT, MINIMUM_BID, FREQUENCY, BLOCKS, CHANELS, COMMENTS, PREV_HIGH, PARTIAL_MKT"
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T"
+strPColumns = Split(clpList, ", ")
+clcList = "A, D, AX, F, G, H, AX, E, I, AX, AX, J, J, J, AX, AX, AX, B, AX, AX"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'Sorted by License_name
+
+ThisWorkbook.Worksheets(6).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes
+
+End Sub
+
+Sub Sheet7Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 7
+'worksheet number in Bidders
+m = 1
+
+sFilePath = ThisWorkbook.Path & "\Items.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "WinningBids"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, LICENSE_NAME, MARKET, FREQ_BLOCK, SUB_MARKET, FCC_ACCT, BIDDER_NAME, BID_ROUND_NUM, BID_AMNT, NET_BID_AMNT, THEDATE, THETIME"
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K, L"
+strPColumns = Split(clpList, ", ")
+clcList = "A, D, F, G, H, N, M, R, O, Q, T, AN"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'delete licenses kept by FCC
+
+For i = Cells(Rows.Count, 2).End(xlUp).Row To 1 Step -1
+If Cells(i, 7) = "FCC" Then Cells(i, 1).EntireRow.Delete
+Next i
+
+'sorted by License_name
+
+ThisWorkbook.Worksheets(7).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes
+
+End Sub
+
+Sub Sheet8Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 8
+'worksheet number in MainBook
+m = 9
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "Rounds"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, THEDATE, THETIME, STAGE, STAGE_REQ, STAGE_TANSIT_PCTG, STAGE_TANSIT_PCTG_WO_FCC, NUM_OF_BIDS, ELIGIB_BIDDERS, ELGIBILITY_RATIO, ELGIBILITY_RATIO_WO_FCC, PWBS_NUMBER, FCC_LICENSES, PWBS_AMNT, NET_PWBS_AMNT, CHNG_PWB_BIDS, CHNG_NET_PWB_BIDS, PWB_CHANGE_PCTG, NET_PWB_CHANGE_PCTG, TOTAL_BIDS_AMNT, TOTAL_NET_BIDS_AMNT, CHNG_TOTAL_BIDS, CHNG_NET_BIDS, BIDDERS_AT_RISK, NUMBER_REDUCED, BU_REDUCED, BID_UNITS_PCTG, PROACTIVE_WAIVERS_USED, NUM_WITHDR_BIDS, NUM_DROP_BIDS"
+
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, AA, AB, AC, AD, AE"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, D, AC, E, AC, K, L, F, S, W, X, G, J, M, P, N, Q, O, R, AC, AC, AC, AC, T, U, V, Y, Z, AA, AB"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'splitting the time into the date and the time
+j = 2
+Do While Not IsEmpty(Range("A" & CStr(j)))
+    Range("C" & CStr(j) & ":D" & CStr(j)) = Split(Range("C" & CStr(j)).Value, " ")
+    'Range("M" & CStr(j)) = Range("N" & CStr(j)) + Range("O" & CStr(j))
+    j = j + 1
+Loop
+
+'sorted by Round
+
+ThisWorkbook.Worksheets(8).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes
+             
+End Sub
+
+Sub Sheet9Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 9
+'worksheet number in MainBook
+m = 6
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "Increments"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, INCR_1, INCR_2, INCR_3, INCR_4, INCR_5, INCR_6, INCR_7, INCR_8, INCR_9"
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I, J, K"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, D, E, F, G, H, I, J, K, L"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'sorted by Round
+ThisWorkbook.Worksheets(9).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending
+
+End Sub
+
+Sub Sheet10Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 10
+'worksheet number in MainBook
+m = 7
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "WaiverStatistics"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, FCC_ACCT, WAIVR_IND, RMNG_WAIVR"
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, E, F, G"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'sorted by Round and FCC_ACCT
+
+ThisWorkbook.Worksheets(10).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("C2"), _
+             order2:=xlAscending
+
+End Sub
+Sub Sheet11Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 11
+'worksheet number in MainBook
+m = 4
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "RaisingOwnHigh"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, LICENSE_NAME, FCC_ACCT, INC_BIDS, BID_AMNT, NET_BID_AMNT, THEDATE, THETIME"
+
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E, F, G, H, I"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, D, J, K, L, M, N, O"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'Sorted by Round, License_name and FCC_ACCT
+ThisWorkbook.Worksheets(11).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("C2"), _
+             order2:=xlAscending, key3:=Range("D2"), order3:=xlAscending
+
+End Sub
+
+Sub Sheet12Reorganizer()
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim n As Integer
+
+'worksheet number in this workbook
+n = 12
+'worksheet number in MainBook
+m = 5
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'working with the first sheet
+ThisWorkbook.Worksheets(n).Name = "BiddersReduced"
+
+Dim strHeaders() As String
+Dim hdList As String
+Dim strCColumns() As String
+Dim clcList As String
+Dim strPColumns() As String
+Dim clpList As String
+
+hdList = "AUCTION_NUMBER, ROUND_NUMBER, FCC_ACCT, BU_REDUCED, UNUSED_ELIG" 'changed MAX_ELIG to UNUSED_ELIG (CURR)
+
+
+strHeaders = Split(hdList, ", ")
+clpList = "A, B, C, D, E"
+strPColumns = Split(clpList, ", ")
+clcList = "A, C, E, F, G"
+strCColumns = Split(clcList, ", ")
+
+
+For i = LBound(strHeaders) To UBound(strHeaders)
+              
+    Header = strHeaders(i)
+    CColumn = strCColumns(i)
+    PColumn = strPColumns(i)
+    
+    bookList.Worksheets(m).Activate
+    Range(CColumn & "2:" & CColumn & "1048576").Copy
+
+    ThisWorkbook.Worksheets(n).Activate
+    Range(PColumn & "2:" & PColumn & "1048576").PasteSpecial
+    Range(PColumn & "1") = Header
+    Application.CutCopyMode = False
+    
+Next
+
+'sorted by Round and FCC account
+ThisWorkbook.Worksheets(12).Columns("A:AH").Sort key1:=Range("B2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("C2"), _
+             order2:=xlAscending
+
+End Sub
+
+
+Sub Sheet1AddColumns()
+
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Long
+Dim j As Long
+Dim iround As String
+Dim jround As String
+Dim imarket As String
+Dim jmarket As String
+Dim ibidder As String
+Dim jbidder As String
+
+'sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+'Set bookList = Workbooks.Open(sFilePath)
+
+'HighBids
+ThisWorkbook.Worksheets(2).Activate
+i = 2
+j = 2
+ValueIsEven = True
+Do While Not IsEmpty(Range("A" & CStr(i)))
+
+    iround = Range("B" & CStr(i))
+    imarket = Range("C" & CStr(i))
+    jround = ThisWorkbook.Worksheets(1).Range("B" & CStr(j))
+    jmarket = ThisWorkbook.Worksheets(1).Range("C" & CStr(j))
+
+    Do While iround = jround And imarket = jmarket
+        ibidder = Range("G" & CStr(i))
+        jbidder = ThisWorkbook.Worksheets(1).Range("K" & CStr(j))
+
+        If ibidder = jbidder Then
+            ThisWorkbook.Worksheets(1).Range("T" & CStr(j)) = "TRUE"
+        Else
+            ThisWorkbook.Worksheets(1).Range("T" & CStr(j)) = "FALSE"
+        End If
+
+        ThisWorkbook.Worksheets(1).Range("V" & CStr(j)) = Range("W" & CStr(i))
+        ThisWorkbook.Worksheets(1).Range("W" & CStr(j)) = Range("U" & CStr(i))
+
+        'set PREV_BIDDER_ACCOUNT to zero if FCC
+        If ThisWorkbook.Worksheets(1).Range("W" & CStr(j)) = "" Then
+            ThisWorkbook.Worksheets(1).Range("W" & CStr(j)) = "0"
+        End If
+
+        j = j + 1
+        Debug.Print "j = "; j
+
+        jround = ThisWorkbook.Worksheets(1).Range("B" & CStr(j))
+        jmarket = ThisWorkbook.Worksheets(1).Range("C" & CStr(j))
+
+    Loop
+
+    i = i + 1
+    Debug.Print "i = "; i
+
+Loop
+
+'winning bids
+ThisWorkbook.Worksheets(7).Activate
+j = 2
+ValueIsEven = True
+Do While Not IsEmpty(ThisWorkbook.Worksheets(1).Range("A" & CStr(j)))
+
+    jmarket = ThisWorkbook.Worksheets(1).Range("C" & CStr(j))
+    jround = ThisWorkbook.Worksheets(1).Range("B" & CStr(j))
+
+    ThisWorkbook.Worksheets(1).Range("U" & CStr(j)) = "FALSE"
+
+    i = 2
+    Do While Not IsEmpty(Range("A" & CStr(i)))
+
+        imarket = Range("B" & CStr(i))
+        iround = Range("H" & CStr(i))
+
+        If imarket = jmarket And iround = jround Then
+            ThisWorkbook.Worksheets(1).Range("U" & CStr(j)) = "TRUE"
+           Exit Do
+           End If
+
+        i = i + 1
+
+    Loop
+
+    j = j + 1
+
+Loop
+
+'eligibility
+ThisWorkbook.Worksheets(3).Activate
+j = 2
+'ValueIsEven = True
+Do While Not IsEmpty(ThisWorkbook.Worksheets(1).Range("A" & CStr(j)))
+
+    jround = ThisWorkbook.Worksheets(1).Range("B" & CStr(j))
+    jbidder = ThisWorkbook.Worksheets(1).Range("K" & CStr(j))
+
+    i = 2
+    Do While Not IsEmpty(Range("A" & CStr(i)))
+
+        iround = Range("B" & CStr(i))
+        ibidder = Range("C" & CStr(i))
+
+        If iround = jround And ibidder = jbidder Then
+
+            'MAX_ELIG
+            ThisWorkbook.Worksheets(1).Range("Y" & CStr(j)) = Range("K" & CStr(i))
+            'RMNG_WAIVR
+            ThisWorkbook.Worksheets(1).Range("Z" & CStr(j)) = Range("R" & CStr(i))
+            'WAIVR_IND
+            ThisWorkbook.Worksheets(1).Range("AA" & CStr(j)) = Range("S" & CStr(i))
+            'RMNG_WITHDR
+            ThisWorkbook.Worksheets(1).Range("AB" & CStr(j)) = Range("T" & CStr(i))
+            'REQUIRED_ACT
+            ThisWorkbook.Worksheets(1).Range("AC" & CStr(j)) = Range("M" & CStr(i))
+            'CURRENT_ACT
+            ThisWorkbook.Worksheets(1).Range("AD" & CStr(j)) = Range("N" & CStr(i))
+
+            Exit Do
+        End If
+
+        i = i + 1
+
+    Loop
+
+    j = j + 1
+
+Loop
+
+'markets
+ThisWorkbook.Worksheets(6).Activate
+j = 2
+i = 2
+    
+ValueIsEven = True
+jround = ThisWorkbook.Worksheets(1).Range("B" & CStr(j))
+
+Do While Not IsEmpty(ThisWorkbook.Worksheets(1).Range("A" & CStr(j)))
+    
+    jmarket = ThisWorkbook.Worksheets(1).Range("C" & CStr(j))
+    jnextround = ThisWorkbook.Worksheets(1).Range("B" & CStr(j))
+    If (jnextround <> jround) Then
+        i = 2
+        jround = jnextround
+    End If
+    
+        
+    Do While Not IsEmpty(Range("A" & CStr(i)))
+        
+        imarket = Range("B" & CStr(i))
+        
+        If imarket = jmarket Then
+            
+            'BidUnits
+            ThisWorkbook.Worksheets(1).Range("I" & CStr(j)) = Range("L" & CStr(i))
+            Exit Do
+            
+        End If
+        
+        i = i + 1
+        
+    Loop
+    
+    j = j + 1
+       
+Loop
+
+'Calculating Bidding Credit Pctg
+ThisWorkbook.Worksheets(1).Activate
+j = 2
+Do While Not IsEmpty(Range("A" & CStr(j)))
+    Range("O" & CStr(j)) = (1 - Range("N" & CStr(j)).Value / Range("M" & CStr(j)).Value) * 100
+    j = j + 1
+Loop
+
+'headers
+Dim arr As Variant
+arr = Array("PROV_WINNING", "WINNING", "PREV_BID_AMNT", "PREV_BIDDER_ACCT", "ROUND_WITHDR", "MAX_ELIG", "RMNG_WAIVR", "WAIVR_IND", "RMNG_WITHDRAWALS", "REQUIRED_ACT", "CURRENT_ACT")
+Range("T1:AD1").Value = arr
+
+End Sub
+
+Sub Sheet5AddColumns()
+
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Integer
+Dim j As Integer
+Dim iround As Integer
+Dim jround As Integer
+Dim imarket As String
+Dim jmarket As String
+Dim ibidder As String
+Dim jbidder As String
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'allbids
+ThisWorkbook.Worksheets(1).Activate
+j = 2
+ValueIsEven = True
+Do While Not IsEmpty(ThisWorkbook.Worksheets(5).Range("A" & CStr(j)))
+    
+    jbidder = ThisWorkbook.Worksheets(5).Range("D" & CStr(j))
+    
+    
+    i = 2
+    
+    Do While Not IsEmpty(Range("A" & CStr(i)))
+        
+        ibidder = Range("K" & CStr(i))
+        
+        If ibidder = jbidder Then
+            
+            'BIDDING_CREDIT_PCTG
+            ThisWorkbook.Worksheets(5).Range("G" & CStr(j)) = Range("O" & CStr(i))
+            Exit Do
+        End If
+        
+        i = i + 1
+        
+    Loop
+    
+    j = j + 1
+       
+Loop
+
+End Sub
+
+
+Sub Sheet2DeleteRows()
+
+Dim i As Long
+Dim bidder As String
+Dim prevbidder As String
+Dim round As String
+
+
+ThisWorkbook.Worksheets(2).Activate
+
+For i = Cells(Rows.Count, 2).End(xlUp).Row To 2 Step -1
+        
+    If i = 1 Then
+        Exit For
+    End If
+        
+    bidround = Range("I" & CStr(i))
+    'prevbidround = Range("V" & CStr(i))
+    round = Range("B" & CStr(i))
+    
+    If bidround <> round And round <> "1" Then
+    
+        prev_i = i
+        Do While i <> 1 And bidround <> round And round <> "1"
+            
+                       
+            i = i - 1
+            bidround = Range("I" & CStr(i))
+            'prevbidround = Range("V" & CStr(i))
+            round = Range("B" & CStr(i))
+           
+        Loop
+    
+        Rows(CStr(i + 1) & ":" & CStr(prev_i)).EntireRow.Delete
+    End If
+Next
+
+
+'For i = Cells(Rows.Count, 2).End(xlUp).Row To 1 Step -1
+'
+'    bidder = Range("G" & CStr(i))
+'    prevbidder = Range("U" & CStr(i))
+'    round = Range("B" & CStr(i))
+'
+'    If bidder = prevbidder And round <> "1" Then
+'
+'        prev_i = i
+'        Do While i <> 0 And bidder = prevbidder And round <> "1"
+'
+'
+'            i = i - 1
+'            bidder = Range("G" & CStr(i))
+'            prevbidder = Range("U" & CStr(i))
+'            round = Range("B" & CStr(i))
+'
+'        Loop
+'
+'        Rows(CStr(i + 1) & ":" & CStr(prev_i)).EntireRow.Delete
+'    End If
+'Next
+
+
+End Sub
+
+
+Sub AddTimeColumn()
+
+'add STAGE_REQUIREMENT to Rounds spreadsheet
+Dim bookList As Workbook
+Dim sFilePath As String
+Dim i As Long
+Dim j As Long
+Dim n As Integer
+Dim m As Integer
+Dim round As Integer
+
+'worksheet number in this workbook
+n = 8
+'worksheet number in MainBook
+m = 10
+
+sFilePath = ThisWorkbook.Path & "\MainBook.xlsx"
+Set bookList = Workbooks.Open(sFilePath)
+
+'sort ADMIN spreadsheet by round
+'bookList.Worksheets(m).Columns("A:AH").Sort key1:=Range("C2"), _
+             order1:=xlAscending, Header:=xlYes
+
+
+'copy REQUIRED_ACTIVITY_PERCENTAGE column from ADMIN spreadsheet
+bookList.Worksheets(m).Activate
+Range("H2:H1048576").Copy
+
+'paste to STAGE_REQUIREMENTcolumn in Rounds spreadsheet
+ThisWorkbook.Worksheets(n).Activate
+Range("F2:F1048576").PasteSpecial
+Application.CutCopyMode = False
+
+
+
+'Add THETIME to AllBids spreadsheet
+ThisWorkbook.Worksheets(1).Activate
+i = 2
+Do While Not IsEmpty(Range("A" & CStr(i)))
+    round = Range("B" & CStr(i))
+    Range("Q" & CStr(i)) = ThisWorkbook.Worksheets(n).Range("D" & CStr(round + 1))
+    i = i + 1
+Loop
+
+'Add THETIME to HighBids spreadsheet
+ThisWorkbook.Worksheets(2).Activate
+i = 2
+Do While Not IsEmpty(Range("A" & CStr(i)))
+    round = Range("I" & CStr(i))
+    If round > 0 Then
+        Range("N" & CStr(i)) = ThisWorkbook.Worksheets(n).Range("D" & CStr(round + 1))
+    End If
+    i = i + 1
+Loop
+
+'Add THETIME to Withdrawals spreadsheet
+ThisWorkbook.Worksheets(4).Activate
+i = 2
+Do While Not IsEmpty(Range("A" & CStr(i)))
+    round = Range("D" & CStr(i))
+    Range("J" & CStr(i)) = ThisWorkbook.Worksheets(n).Range("D" & CStr(round + 1))
+    i = i + 1
+Loop
+
+'Add THETIME to WinningBids spreadsheet
+ThisWorkbook.Worksheets(7).Activate
+i = 2
+Do While Not IsEmpty(Range("A" & CStr(i)))
+    round = Range("H" & CStr(i))
+    Range("L" & CStr(i)) = ThisWorkbook.Worksheets(n).Range("D" & CStr(round + 1))
+    i = i + 1
+Loop
+
+'Add THETIME to RaisingOwnHigh spreadsheet
+ThisWorkbook.Worksheets(11).Activate
+i = 2
+Do While Not IsEmpty(Range("A" & CStr(i)))
+    round = Range("B" & CStr(i))
+    Range("I" & CStr(i)) = ThisWorkbook.Worksheets(n).Range("D" & CStr(round + 1))
+    i = i + 1
+Loop
+
+
+
+'add ROUND_WITHDR to AllBids spreadsheet
+
+ThisWorkbook.Worksheets(4).Activate
+
+'Sort Withdrawals spreadsheet by Bid Round and Bidder Name
+Columns("A:AH").Sort key1:=Range("D2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("B2"), _
+             order2:=xlAscending
+
+j = 2
+Do While Not IsEmpty(Range("A" & CStr(j)))
+
+    jround = Range("D" & CStr(j))
+    jlicense = Range("B" & CStr(j))
+    jbidder = Range("E" & CStr(j))
+    withdrawn = Range("C" & CStr(j))
+    i = 2
+
+    Do While Not IsEmpty(ThisWorkbook.Worksheets(1).Range("A" & CStr(i)))
+
+        iround = ThisWorkbook.Worksheets(1).Range("B" & CStr(i))
+        ilicense = ThisWorkbook.Worksheets(1).Range("C" & CStr(i))
+        ibidder = ThisWorkbook.Worksheets(1).Range("K" & CStr(i))
+
+        If iround = jround And ilicense = jlicense And jbidder = ibidder Then
+
+       ThisWorkbook.Worksheets(1).Range("X" & CStr(i)) = withdrawn
+           Exit Do
+        End If
+
+        i = i + 1
+
+    Loop
+
+    j = j + 1
+
+Loop
+
+'Sort Withdrawals spreadsheet by Round and Bidder Name
+Columns("A:AH").Sort key1:=Range("C2"), _
+             order1:=xlAscending, Header:=xlYes, key2:=Range("B2"), _
+             order2:=xlAscending
+
+End Sub
+
+
+
